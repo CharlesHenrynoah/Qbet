@@ -52,8 +52,20 @@ export interface User {
   lastName: string;
   company?: string;
   phone?: string;
-  plan: 'Basic' | 'Pro' | 'Enterprise';
+  profilePicture?: string;
+  plan: {
+    name: string;
+    price: string;
+    features: string[];
+  };
   createdAt: Date;
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  date: Date;
+  messages: Message[];
 }
 
 export interface AuthState {

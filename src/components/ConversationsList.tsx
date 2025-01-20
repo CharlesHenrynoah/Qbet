@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoreHorizontal, Pencil, Trash2, X, Search } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, X, Search, MessageSquarePlus } from 'lucide-react';
 
 interface Conversation {
   id: string;
@@ -17,59 +17,24 @@ interface Message {
 interface ConversationsListProps {
   onConversationSelect?: (conversation: Conversation) => void;
   onClose?: () => void;
+  conversations: Conversation[];
+  onNewConversation?: () => void;
 }
 
-export const ConversationsList: React.FC<ConversationsListProps> = ({ onConversationSelect, onClose }) => {
+export const ConversationsList: React.FC<ConversationsListProps> = ({ 
+  onConversationSelect, 
+  onClose,
+  conversations = [],
+  onNewConversation 
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [showOptionsId, setShowOptionsId] = useState<string | null>(null);
 
-  // Exemple de conversations (à remplacer par les vraies données)
-  const [conversations, setConversations] = useState<Conversation[]>([
-    {
-      id: '1',
-      title: 'Identification des destinataires en',
-      date: new Date(),
-      messages: []
-    },
-    {
-      id: '2',
-      title: 'Mise à jour jQuery',
-      date: new Date(),
-      messages: []
-    },
-    {
-      id: '3',
-      title: 'Réécriture de Pull Request',
-      date: new Date(),
-      messages: []
-    },
-    {
-      id: '4',
-      title: 'Résumé des tâches Dev',
-      date: new Date(),
-      messages: []
-    },
-    {
-      id: '5',
-      title: 'Résumé Daily 20/01/2025',
-      date: new Date(),
-      messages: []
-    },
-    {
-      id: '6',
-      title: 'Envoi de message',
-      date: new Date(),
-      messages: []
-    },
-    {
-      id: '7',
-      title: 'Résumé de la conversation',
-      date: new Date(-1),
-      messages: []
-    }
-  ]);
+  const filteredConversations = conversations.filter(conv => 
+    conv.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleEdit = (id: string, title: string) => {
     setEditingId(id);
@@ -87,138 +52,110 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({ onConversa
     setConversations(conversations.filter(conv => conv.id !== id));
   };
 
-  const groupedConversations = conversations.reduce((groups, conv) => {
-    const date = new Date(conv.date);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    let dateStr = 'Plus ancien';
-    if (date.toDateString() === today.toDateString()) {
-      dateStr = "Aujourd'hui";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      dateStr = 'Hier';
-    }
-
-    if (!groups[dateStr]) {
-      groups[dateStr] = [];
-    }
-    groups[dateStr].push(conv);
-    return groups;
-  }, {} as Record<string, Conversation[]>);
-
   return (
-    <div className="flex flex-col h-full bg-mono-900">
+    <div className="flex flex-col h-full">
       {/* Barre de recherche */}
-      <div className="px-4 py-3">
+      <div className="px-4 py-2">
         <div className="relative">
           <input
             type="text"
-            placeholder="Rechercher..."
+            placeholder="Rechercher une conversation..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 bg-mono-800 text-mono-50 placeholder-mono-400 rounded border-none focus:outline-none focus:ring-0"
+            className="w-full bg-mono-800 text-mono-50 rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-mono-700"
           />
-          <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-mono-400">
-            <Search className="w-4 h-4" />
-          </button>
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-mono-400" />
         </div>
       </div>
 
-      {/* Liste des conversations */}
-      <div className="flex-1 overflow-y-auto min-h-0">
-        {Object.entries(groupedConversations).map(([date, convs]) => (
-          <div key={date} className="mb-2">
-            <div className="px-4 py-1 sticky top-0 bg-mono-900 z-10">
-              <h3 className="text-sm text-mono-400 font-normal">{date}</h3>
+      {/* Liste des conversations ou message vide */}
+      <div className="flex-1 overflow-auto">
+        {conversations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full px-4 py-8 text-center">
+            <div className="bg-mono-800 rounded-full p-4 mb-4">
+              <MessageSquarePlus className="w-8 h-8 text-mono-400" />
             </div>
-            <div>
-              {convs.map((conv) => (
-                <div
-                  key={conv.id}
-                  className="relative group"
-                >
-                  {editingId === conv.id ? (
-                    <div className="flex items-center gap-2 px-4 py-1">
-                      <input
-                        type="text"
-                        value={editingTitle}
-                        onChange={(e) => setEditingTitle(e.target.value)}
-                        className="flex-1 px-2 py-1 bg-mono-800 text-mono-50 rounded focus:outline-none"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleSaveEdit(conv.id);
-                          }
-                        }}
-                      />
-                      <button
-                        onClick={() => handleSaveEdit(conv.id)}
-                        className="text-mono-400 hover:text-mono-50 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between px-4 py-1.5 hover:bg-mono-800/50 group">
-                      <span 
-                        className="text-mono-50 hover:text-mono-200 flex-1 truncate pr-2 text-[13px] cursor-pointer"
-                        onClick={() => onConversationSelect?.(conv)}
-                      >
-                        {conv.title}
-                      </span>
-                      <div className="flex items-center gap-2 transition-opacity">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(conv.id, conv.title);
-                          }}
-                          className="text-mono-50 hover:text-mono-200 transition-colors p-1"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(conv.id);
-                          }}
-                          className="text-mono-50 hover:text-mono-200 transition-colors p-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <h3 className="text-mono-50 font-medium mb-2">Aucune conversation</h3>
+            <p className="text-mono-400 text-sm mb-6">
+              Commencez une nouvelle conversation pour interagir avec Manhattan
+            </p>
+            <button
+              onClick={onNewConversation}
+              className="px-4 py-2 bg-mono-800 text-mono-50 rounded-lg hover:bg-mono-700 transition-colors text-sm"
+            >
+              Nouvelle conversation
+            </button>
           </div>
-        ))}
+        ) : filteredConversations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full px-4 py-8 text-center">
+            <p className="text-mono-400 text-sm">
+              Aucune conversation ne correspond à votre recherche
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-1 p-2">
+            {/* Aujourd'hui */}
+            <div className="px-2 py-1">
+              <h3 className="text-xs font-medium text-mono-400">Aujourd'hui</h3>
+            </div>
+            {filteredConversations.map((conversation) => (
+              <div
+                key={conversation.id}
+                className="relative group"
+              >
+                <button
+                  onClick={() => onConversationSelect?.(conversation)}
+                  className="w-full px-2 py-2 rounded-lg text-left hover:bg-mono-800 transition-colors group flex items-center justify-between"
+                >
+                  {editingId === conversation.id ? (
+                    <input
+                      type="text"
+                      value={editingTitle}
+                      onChange={(e) => setEditingTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSaveEdit(conversation.id);
+                        }
+                      }}
+                      className="flex-1 bg-mono-700 text-mono-50 rounded px-2 py-1 text-sm focus:outline-none"
+                      autoFocus
+                    />
+                  ) : (
+                    <span className="text-mono-50 text-sm truncate">
+                      {conversation.title}
+                    </span>
+                  )}
+                  
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(conversation.id, conversation.title);
+                      }}
+                      className="p-1 text-mono-400 hover:text-mono-50 transition-colors"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(conversation.id);
+                      }}
+                      className="p-1 text-mono-400 hover:text-mono-50 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </button>
+              </div>
+            ))}
 
-        {Object.keys(groupedConversations).length === 0 && (
-          <div className="flex-1 flex items-center justify-center text-mono-400 text-sm">
-            Aucune conversation
+            {/* Plus ancien */}
+            <div className="px-2 py-1 mt-4">
+              <h3 className="text-xs font-medium text-mono-400">Plus ancien</h3>
+            </div>
           </div>
         )}
-      </div>
-
-      {/* Bouton nouvelle conversation */}
-      <div className="p-4">
-        <button
-          onClick={() => {
-            const newConv = {
-              id: Date.now().toString(),
-              title: 'Nouvelle conversation',
-              date: new Date(),
-              messages: []
-            };
-            setConversations([newConv, ...conversations]);
-            handleEdit(newConv.id, newConv.title);
-          }}
-          className="w-full py-2.5 bg-mono-50 hover:bg-mono-200 text-mono-900 rounded-md transition-colors text-sm font-medium"
-        >
-          Nouvelle conversation
-        </button>
       </div>
     </div>
   );

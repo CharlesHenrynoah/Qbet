@@ -1,6 +1,5 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { SubscriptionPlan } from './SubscriptionPlan';
 
 interface SubscriptionSidebarProps {
   isOpen: boolean;
@@ -49,40 +48,65 @@ export function SubscriptionSidebar({ isOpen, onClose, selectedPlan, onSelectPla
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
-      <div className="fixed inset-y-0 right-0 w-full max-w-6xl bg-mono-800 shadow-xl overflow-hidden">
-        <div className="h-full flex flex-col">
-          <div className="flex items-center gap-4 p-6 border-b border-mono-700">
-            <button
-              onClick={onClose}
-              className="p-2 text-mono-400 hover:text-mono-50 transition-colors rounded-lg hover:bg-mono-700"
-            >
-              <ArrowLeft className="w-5 h-5" />
+      <div className="absolute right-0 top-0 h-full w-full max-w-xl bg-mono-900 shadow-xl overflow-y-auto">
+        <div className="p-4">
+          <div className="flex items-center gap-3 mb-4">
+            <button onClick={onClose} className="text-mono-400 hover:text-mono-50 transition-colors">
+              <ArrowLeft className="w-4 h-4" />
             </button>
-            <h2 className="text-xl font-orbitron text-mono-50">Choose your plan</h2>
+            <h2 className="text-base font-orbitron text-mono-50">Choose your plan</h2>
           </div>
 
-          <div className="flex-1 overflow-auto p-6">
-            <div className="grid grid-cols-3 gap-6 h-full">
-              {plans.map((plan) => (
-                <SubscriptionPlan
-                  key={plan.name}
-                  plan={plan}
-                  isSelected={selectedPlan === plan.name}
-                  onSelect={() => onSelectPlan(plan.name)}
-                />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 gap-3">
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                className={`relative p-3 rounded border ${
+                  selectedPlan === plan.name
+                    ? 'border-mono-50 bg-mono-800'
+                    : 'border-mono-700 bg-mono-800/50 hover:border-mono-600'
+                } cursor-pointer transition-all`}
+                onClick={() => onSelectPlan(plan.name)}
+              >
+                {plan.isPopular && (
+                  <span className="absolute right-2 top-2 text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-500 font-medium">
+                    Populaire
+                  </span>
+                )}
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-mono-50">{plan.name}</span>
+                  <div className="flex items-baseline gap-0.5 mt-1 mb-2">
+                    <span className="text-xl font-bold text-mono-50">{plan.price}€</span>
+                    <span className="text-[10px] text-mono-400">/mois</span>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-center gap-1.5">
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="w-3 h-3 text-mono-400"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span className="text-xs text-mono-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="p-6 border-t border-mono-700">
-            <button
-              onClick={onConfirm}
-              disabled={!selectedPlan}
-              className="w-full px-8 py-3 bg-mono-50 text-mono-900 rounded-lg hover:bg-mono-200 transition-colors font-orbitron disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Complete registration with {selectedPlan || 'selected plan'}
-            </button>
-          </div>
+          <button
+            onClick={onConfirm}
+            disabled={!selectedPlan}
+            className="w-full mt-3 py-1.5 bg-mono-50 text-mono-900 rounded hover:bg-mono-200 transition-colors font-medium text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {selectedPlan ? `Complete registration with ${selectedPlan}` : 'Select a plan to continue'}
+          </button>
         </div>
       </div>
     </div>

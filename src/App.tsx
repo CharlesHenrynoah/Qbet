@@ -25,6 +25,7 @@ function App() {
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const [isLoginMode, setIsLoginMode] = React.useState(true);
   const [currentUser, setCurrentUser] = React.useState<UserType | null>(null);
+  const [conversations, setConversations] = React.useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = React.useState<Conversation | null>(null);
   const [showProfileModal, setShowProfileModal] = React.useState(false);
 
@@ -170,6 +171,18 @@ function App() {
               <ConversationsList 
                 onConversationSelect={handleConversationSelect}
                 onClose={() => setShowConversations(false)}
+                conversations={conversations}
+                onNewConversation={() => {
+                  const newConv = {
+                    id: Date.now().toString(),
+                    title: 'Nouvelle conversation',
+                    date: new Date(),
+                    messages: []
+                  };
+                  setConversations([newConv, ...conversations]);
+                  setSelectedConversation(newConv);
+                  setShowConversations(false);
+                }}
               />
             </div>
           </div>

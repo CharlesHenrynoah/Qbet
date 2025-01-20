@@ -168,8 +168,8 @@ function App() {
                     key={index}
                     className={`p-3 rounded-lg ${
                       message.type === 'user'
-                        ? 'bg-mono-700 ml-8'
-                        : 'bg-mono-900 mr-8'
+                        ? 'bg-mono-700 ml-[15%]'  
+                        : 'bg-mono-900 mr-[15%]'
                     }`}
                   >
                     <p className="text-sm text-mono-50">{message.content}</p>
@@ -200,14 +200,20 @@ function App() {
         showConversations ? 'ml-80' : 'ml-0'
       }`}>
         <header className="bg-mono-800 border-b border-mono-700">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center">
+            {/* Left side - empty to balance layout */}
+            <div className="flex-1"></div>
+            
+            {/* Center - Manhattan logo */}
+            <div className="flex items-center absolute left-1/2 transform -translate-x-1/2">
               <h1 className="text-xl font-orbitron text-mono-50">Manhattan<span className="text-mono-400">.ai</span></h1>
             </div>
-            <div className="flex items-center gap-4">
+            
+            {/* Right side - controls */}
+            <div className="flex items-center gap-4 flex-1 justify-end">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 text-mono-300 hover:text-mono-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-mono-300 hover:text-mono-50 transition-colors whitespace-nowrap"
               >
                 <Sliders className="w-4 h-4" />
                 <span className="font-orbitron">Filters</span>
@@ -230,7 +236,7 @@ function App() {
                     setIsLoginMode(true);
                     setShowAuthModal(true);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 bg-mono-50 text-mono-900 rounded-lg hover:bg-mono-200 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-mono-50 text-mono-900 rounded-lg hover:bg-mono-200 transition-colors whitespace-nowrap"
                 >
                   <User className="w-4 h-4" />
                   <span className="font-orbitron">Login</span>
@@ -250,34 +256,50 @@ function App() {
                 <div
                   className={`max-w-[80%] rounded-lg p-4 ${
                     message.type === 'user'
-                      ? 'bg-mono-800 text-mono-50'
+                      ? 'bg-mono-700 mr-[15%]'  
+                      : message.type === 'assistant'
+                      ? 'bg-mono-800 ml-[15%]'  
+                      : message.type === 'stats'
+                      ? 'bg-mono-800 w-full'
                       : message.type === 'attachments'
                       ? 'bg-mono-800 border border-mono-700 w-full'
-                      : message.type === 'stats'
-                      ? 'w-full'
                       : 'bg-mono-800 border border-mono-700'
                   }`}
                 >
-                  <p className="text-mono-50">{message.content}</p>
-                  {message.attachments && (
-                    <div className="mt-3 space-y-2">
-                      {message.attachments.map((attachment) => (
-                        <a
-                          key={attachment.id}
-                          href={attachment.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-mono-300 hover:text-mono-50"
-                        >
-                          <span className="truncate">{attachment.name}</span>
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                  {message.type === 'stats' && message.freelancers && (
-                    <div className="mt-4">
-                      <MarketStats freelancers={message.freelancers} />
-                    </div>
+                  {message.type === 'stats' ? (
+                    <>
+                      <p className="text-mono-50 mb-4">{message.content}</p>
+                      <MarketStats freelancers={message.freelancers || []} />
+                    </>
+                  ) : message.type === 'attachments' ? (
+                    <>
+                      <p className="text-mono-50 mb-4">{message.content}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {message.attachments?.map((attachment) => (
+                          <div
+                            key={attachment.id}
+                            className="flex items-center gap-3 p-3 bg-mono-700 rounded-lg"
+                          >
+                            <div className="flex-1 truncate">
+                              <p className="text-sm text-mono-50 truncate">
+                                {attachment.name}
+                              </p>
+                              <p className="text-xs text-mono-400">
+                                {attachment.size}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleRemoveAttachment(attachment.id)}
+                              className="p-1 text-mono-400 hover:text-mono-50"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-mono-50">{message.content}</p>
                   )}
                 </div>
               </div>

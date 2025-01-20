@@ -132,8 +132,12 @@ function App() {
     try {
       await logout();
       setCurrentUser(null);
+      setShowConversations(false);  // Ferme la partie conversation
+      setSelectedConversation(null); // Réinitialise la conversation sélectionnée
+      setConversations([]); // Vide la liste des conversations
+      setMessages([]); // Vide les messages
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Erreur lors de la déconnexion:', error);
     }
   };
 
@@ -150,6 +154,18 @@ function App() {
     setSelectedConversation(conversation);
     setShowConversations(false); // Ferme le panneau des conversations
     setMessages(conversation.messages); // Charge les messages de la conversation
+  };
+
+  const handleNewConversation = () => {
+    const newConv = {
+      id: Date.now().toString(),
+      title: 'Nouvelle conversation',
+      date: new Date(),
+      messages: []
+    };
+    setConversations([newConv, ...conversations]);
+    setSelectedConversation(newConv);
+    setShowConversations(false);
   };
 
   return (
@@ -169,20 +185,17 @@ function App() {
             </div>
             <div className="h-[calc(100vh-64px)] overflow-auto">
               <ConversationsList 
-                onConversationSelect={handleConversationSelect}
-                onClose={() => setShowConversations(false)}
                 conversations={conversations}
-                onNewConversation={() => {
-                  const newConv = {
-                    id: Date.now().toString(),
-                    title: 'Nouvelle conversation',
-                    date: new Date(),
-                    messages: []
-                  };
-                  setConversations([newConv, ...conversations]);
-                  setSelectedConversation(newConv);
+                onClose={() => setShowConversations(false)}
+                onConversationSelect={(conversation) => {
+                  setSelectedConversation(conversation);
                   setShowConversations(false);
                 }}
+                onNewConversation={handleNewConversation}
+                onDelete={(id) => setConversations(conversations.filter(conv => conv.id !== id))}
+                onEdit={(id, newTitle) => setConversations(conversations.map(conv => 
+                  conv.id === id ? { ...conv, title: newTitle } : conv
+                ))}
               />
             </div>
           </div>
@@ -218,7 +231,7 @@ function App() {
             {/* Titre centré */}
             <div className="flex-1 flex justify-center">
               <h1 className="text-lg font-orbitron">
-                {selectedConversation ? selectedConversation.title : 'Manhattan'}
+                Manhattan
               </h1>
             </div>
 

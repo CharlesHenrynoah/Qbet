@@ -19,13 +19,17 @@ interface ConversationsListProps {
   onClose?: () => void;
   conversations: Conversation[];
   onNewConversation?: () => void;
+  onDelete?: (id: string) => void;
+  onEdit?: (id: string, newTitle: string) => void;
 }
 
 export const ConversationsList: React.FC<ConversationsListProps> = ({ 
   onConversationSelect, 
   onClose,
   conversations = [],
-  onNewConversation 
+  onNewConversation,
+  onDelete,
+  onEdit
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -42,14 +46,16 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
   };
 
   const handleSaveEdit = (id: string) => {
-    setConversations(conversations.map(conv => 
-      conv.id === id ? { ...conv, title: editingTitle } : conv
-    ));
+    if (onEdit) {
+      onEdit(id, editingTitle);
+    }
     setEditingId(null);
   };
 
   const handleDelete = (id: string) => {
-    setConversations(conversations.filter(conv => conv.id !== id));
+    if (onDelete) {
+      onDelete(id);
+    }
   };
 
   return (
@@ -79,12 +85,6 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
             <p className="text-mono-400 text-sm mb-6">
               Commencez une nouvelle conversation pour interagir avec Manhattan
             </p>
-            <button
-              onClick={onNewConversation}
-              className="px-4 py-2 bg-mono-800 text-mono-50 rounded-lg hover:bg-mono-700 transition-colors text-sm"
-            >
-              Nouvelle conversation
-            </button>
           </div>
         ) : filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full px-4 py-8 text-center">
@@ -103,9 +103,9 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                 key={conversation.id}
                 className="relative group"
               >
-                <button
+                <div
                   onClick={() => onConversationSelect?.(conversation)}
-                  className="w-full px-2 py-2 rounded-lg text-left hover:bg-mono-800 transition-colors group flex items-center justify-between"
+                  className="w-full px-2 py-2 rounded-lg text-left hover:bg-mono-800 transition-colors group flex items-center justify-between cursor-pointer"
                 >
                   {editingId === conversation.id ? (
                     <input
@@ -126,36 +126,42 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
                     </span>
                   )}
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEdit(conversation.id, conversation.title);
                       }}
-                      className="p-1 text-mono-400 hover:text-mono-50 transition-colors"
+                      className="p-1.5 text-mono-50 transition-colors rounded hover:bg-mono-700"
                     >
-                      <Pencil className="w-4 h-4" />
+                      <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(conversation.id);
                       }}
-                      className="p-1 text-mono-400 hover:text-mono-50 transition-colors"
+                      className="p-1.5 text-mono-50 transition-colors rounded hover:bg-mono-700 hover:text-red-400"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                </button>
+                </div>
               </div>
             ))}
-
-            {/* Plus ancien */}
-            <div className="px-2 py-1 mt-4">
-              <h3 className="text-xs font-medium text-mono-400">Plus ancien</h3>
-            </div>
           </div>
         )}
+      </div>
+
+      {/* Bouton Nouvelle conversation en bas */}
+      <div className="p-4 border-t border-mono-800">
+        <button
+          onClick={onNewConversation}
+          className="w-full py-2 bg-mono-800 hover:bg-mono-700 text-mono-50 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
+        >
+          <MessageSquarePlus className="w-4 h-4" />
+          <span>Nouvelle conversation</span>
+        </button>
       </div>
     </div>
   );

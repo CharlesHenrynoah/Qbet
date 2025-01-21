@@ -49,7 +49,22 @@ function App() {
 
   const handleSearch = async (query: string) => {
     setSearchTerms(query.toLowerCase().split(' '));
-    setMessages(prev => [...prev, { type: 'user', content: query }]);
+    const newMessage = { type: 'user', content: query } as Message;
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+
+    // Mettre à jour la conversation sélectionnée avec le nouveau message
+    if (selectedConversation) {
+      const updatedConversation = {
+        ...selectedConversation,
+        messages: updatedMessages
+      };
+      setSelectedConversation(updatedConversation);
+      setConversations(conversations.map(conv =>
+        conv.id === selectedConversation.id ? updatedConversation : conv
+      ));
+    }
+
     setIsLoading(true);
 
     try {
@@ -57,17 +72,49 @@ function App() {
       const results = await searchFreelancers(query);
       setFreelancers(results);
       
-      const response = `Based on your search "${query}", here are ${results.length} freelancers that might interest you:`;
-      setMessages(prev => [
-        ...prev,
-        { type: 'assistant', content: response },
-        { type: 'stats', content: 'Market Statistics:', freelancers: results }
-      ]);
+      const response = { 
+        type: 'assistant', 
+        content: `Based on your search "${query}", here are ${results.length} freelancers that might interest you:` 
+      } as Message;
+      const statsMessage = { 
+        type: 'stats', 
+        content: 'Market Statistics:', 
+        freelancers: results 
+      } as Message;
+
+      const finalMessages = [...updatedMessages, response, statsMessage];
+      setMessages(finalMessages);
+
+      // Mettre à jour la conversation sélectionnée avec tous les nouveaux messages
+      if (selectedConversation) {
+        const finalConversation = {
+          ...selectedConversation,
+          messages: finalMessages
+        };
+        setSelectedConversation(finalConversation);
+        setConversations(conversations.map(conv =>
+          conv.id === selectedConversation.id ? finalConversation : conv
+        ));
+      }
     } catch (error) {
-      setMessages(prev => [...prev, { 
+      const errorMessage = { 
         type: 'assistant', 
         content: "Sorry, an error occurred during the search. Please try again." 
-      }]);
+      } as Message;
+      const finalMessages = [...updatedMessages, errorMessage];
+      setMessages(finalMessages);
+
+      // Mettre à jour la conversation sélectionnée avec le message d'erreur
+      if (selectedConversation) {
+        const finalConversation = {
+          ...selectedConversation,
+          messages: finalMessages
+        };
+        setSelectedConversation(finalConversation);
+        setConversations(conversations.map(conv =>
+          conv.id === selectedConversation.id ? finalConversation : conv
+        ));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -151,12 +198,28 @@ function App() {
   };
 
   const handleConversationSelect = (conversation: Conversation) => {
-    setSelectedConversation(conversation);
-    setShowConversations(false); // Ferme le panneau des conversations
-    setMessages(conversation.messages); // Charge les messages de la conversation
+    if (conversation.id !== selectedConversation?.id) {
+      setSelectedConversation(conversation);
+      setShowConversations(false);
+      // Réinitialiser les messages actuels et les remplacer par ceux de la conversation sélectionnée
+      setMessages([...conversation.messages]);
+      // Réinitialiser les freelancers si nécessaire
+      if (conversation.messages.some(msg => msg.type === 'stats')) {
+        const lastStatsMessage = conversation.messages
+          .filter(msg => msg.type === 'stats')
+          .pop();
+        if (lastStatsMessage && lastStatsMessage.freelancers) {
+          setFreelancers(lastStatsMessage.freelancers);
+        }
+      }
+    }
   };
 
   const handleNewConversation = () => {
+    // Réinitialiser les messages et les freelancers pour une nouvelle conversation
+    setMessages([]);
+    setFreelancers([]);
+    
     const newConv = {
       id: Date.now().toString(),
       title: 'Nouvelle conversation',

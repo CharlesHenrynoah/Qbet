@@ -12,51 +12,51 @@ interface FreelancerCardProps {
 const colorThemes = [
   {
     name: 'emerald',
-    gradient: 'from-emerald-500 to-teal-500',
     accent: 'text-emerald-400',
-    hover: 'hover:shadow-emerald-500/20',
+    border: 'hover:border-emerald-400',
+    shadow: 'hover:shadow-emerald-500/30',
   },
   {
     name: 'rose',
-    gradient: 'from-rose-500 to-pink-500',
     accent: 'text-rose-400',
-    hover: 'hover:shadow-rose-500/20',
+    border: 'hover:border-rose-400',
+    shadow: 'hover:shadow-rose-500/30',
   },
   {
     name: 'amber',
-    gradient: 'from-amber-500 to-orange-500',
     accent: 'text-amber-400',
-    hover: 'hover:shadow-amber-500/20',
+    border: 'hover:border-amber-400',
+    shadow: 'hover:shadow-amber-500/30',
   },
   {
     name: 'violet',
-    gradient: 'from-violet-500 to-purple-500',
     accent: 'text-violet-400',
-    hover: 'hover:shadow-violet-500/20',
+    border: 'hover:border-violet-400',
+    shadow: 'hover:shadow-violet-500/30',
   },
   {
     name: 'blue',
-    gradient: 'from-blue-500 to-indigo-500',
     accent: 'text-blue-400',
-    hover: 'hover:shadow-blue-500/20',
+    border: 'hover:border-blue-400',
+    shadow: 'hover:shadow-blue-500/30',
   },
   {
     name: 'fuchsia',
-    gradient: 'from-fuchsia-500 to-purple-500',
     accent: 'text-fuchsia-400',
-    hover: 'hover:shadow-fuchsia-500/20',
+    border: 'hover:border-fuchsia-400',
+    shadow: 'hover:shadow-fuchsia-500/30',
   },
   {
     name: 'lime',
-    gradient: 'from-lime-500 to-green-500',
     accent: 'text-lime-400',
-    hover: 'hover:shadow-lime-500/20',
+    border: 'hover:border-lime-400',
+    shadow: 'hover:shadow-lime-500/30',
   },
   {
     name: 'red',
-    gradient: 'from-red-500 to-rose-500',
     accent: 'text-red-400',
-    hover: 'hover:shadow-red-500/20',
+    border: 'hover:border-red-400',
+    shadow: 'hover:shadow-red-500/30',
   }
 ];
 
@@ -96,16 +96,15 @@ export function FreelancerCard({ freelancer, searchTerms = [] }: FreelancerCardP
 
   return (
     <div
-      className={`relative overflow-hidden bg-mono-800 rounded-lg shadow-lg border border-mono-700 p-4 group cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl ${theme.hover}`}
+      className={`relative overflow-hidden bg-mono-800 rounded-lg p-4 group cursor-pointer 
+      transform transition-all duration-300 
+      hover:scale-[1.03] hover:-translate-y-1
+      border-2 border-mono-700 ${theme.border}
+      shadow-lg ${theme.shadow}
+      hover:shadow-xl hover:shadow-2xl`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Gradient de fond animé */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient} transition-opacity duration-500 ${isHovered ? 'opacity-10' : 'opacity-0'}`} />
-      
-      {/* Effet de brillance */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -translate-x-full group-hover:translate-x-full" />
-
       <div className="relative z-10 flex items-start gap-4">
         <div className="relative">
           <img
@@ -113,7 +112,6 @@ export function FreelancerCard({ freelancer, searchTerms = [] }: FreelancerCardP
             alt={freelancer.name}
             className="w-12 h-12 rounded-full object-cover ring-2 ring-mono-50 transition-transform duration-300 group-hover:scale-110"
           />
-          <div className={`absolute inset-0 rounded-full bg-gradient-to-tr ${theme.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
         </div>
 
         <div className="flex-1">

@@ -3,7 +3,7 @@ import { Send, Paperclip } from 'lucide-react';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
-  onUpload?: () => void;
+  onUpload?: (files: File[]) => void;
 }
 
 export function SearchBar({ onSearch, onUpload }: SearchBarProps) {

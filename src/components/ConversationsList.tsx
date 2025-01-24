@@ -83,7 +83,7 @@ export const ConversationsList: React.FC<ConversationsListProps> = ({
             </div>
             <h3 className="text-mono-50 font-medium mb-2">Aucune conversation</h3>
             <p className="text-mono-400 text-sm mb-6">
-              Commencez une nouvelle conversation pour interagir avec Manhattan
+              Commencez une nouvelle conversation pour interagir avec Qbet
             </p>
           </div>
         ) : filteredConversations.length === 0 ? (

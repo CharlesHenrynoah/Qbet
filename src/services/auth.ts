@@ -27,7 +27,7 @@ export async function login(email: string, password: string): Promise<User> {
   return user;
 }
 
-export async function signup(data: SignupData): Promise<void> {
+export async function signup(email: string, password: string, firstName: string, lastName: string, dateOfBirth: string, p0: string, _gender: string, gender: string, profilePicture: File | null, username: string, data: SignupData): Promise<void> {
   try {
     const formData = new FormData();
     formData.append('email', data.email);

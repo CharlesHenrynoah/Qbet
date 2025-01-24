@@ -34,7 +34,7 @@ import {
   Conversation
 } from './types';
 import { searchFreelancers } from './services/scraper';
-import { uploadAttachment } from './services/attachments';
+import { uploadAttachment, validateFile } from './services/attachments';
 import { playTamTam } from './services/sound';
 import { login, signup, logout } from './services/auth';
 
@@ -166,7 +166,10 @@ function MainApp() {
 
     try {
       const newAttachments = await Promise.all(
-        files.map(file => uploadAttachment(file))
+        files.map(async (file) => {
+          await validateFile(file);
+          return uploadAttachment(file);
+        })
       );
 
       setAttachments(prev => [...prev, ...newAttachments]);
@@ -199,6 +202,7 @@ function MainApp() {
       setShowAuthModal(false);
     } catch (error) {
       console.error('Login error:', error);
+      setError('Login failed. Please check your credentials and try again.');
     }
   };
 
@@ -254,34 +258,44 @@ function MainApp() {
   };
 
   const handleConversationSelect = (conversation: Conversation) => {
-    if (conversation.id !== selectedConversation?.id) {
-      setSelectedConversation(conversation);
-      setShowConversations(false);
-      setMessages([...conversation.messages]);
-      if (conversation.messages.some(msg => msg.type === 'stats')) {
-        const lastStatsMessage = conversation.messages
-          .filter(msg => msg.type === 'stats')
-          .pop();
-        if (lastStatsMessage && lastStatsMessage.freelancers) {
-          setFreelancers(lastStatsMessage.freelancers);
+    try {
+      if (conversation.id !== selectedConversation?.id) {
+        setSelectedConversation(conversation);
+        setShowConversations(false);
+        setMessages([...conversation.messages]);
+        if (conversation.messages.some(msg => msg.type === 'stats')) {
+          const lastStatsMessage = conversation.messages
+            .filter(msg => msg.type === 'stats')
+            .pop();
+          if (lastStatsMessage && lastStatsMessage.freelancers) {
+            setFreelancers(lastStatsMessage.freelancers);
+          }
         }
       }
+    } catch (error) {
+      console.error('Error selecting conversation:', error);
+      setError('An error occurred while selecting the conversation. Please try again.');
     }
   };
 
   const handleNewConversation = () => {
-    setMessages([]);
-    setFreelancers([]);
+    try {
+      setMessages([]);
+      setFreelancers([]);
 
-    const newConv: Conversation = {
-      id: Date.now().toString(),
-      title: 'Nouvelle conversation',
-      date: new Date(),
-      messages: []
-    };
-    setConversations([newConv, ...conversations]);
-    setSelectedConversation(newConv);
-    setShowConversations(false);
+      const newConv: Conversation = {
+        id: Date.now().toString(),
+        title: 'Nouvelle conversation',
+        date: new Date(),
+        messages: []
+      };
+      setConversations([newConv, ...conversations]);
+      setSelectedConversation(newConv);
+      setShowConversations(false);
+    } catch (error) {
+      console.error('Error creating new conversation:', error);
+      setError('An error occurred while creating a new conversation. Please try again.');
+    }
   };
 
   return (

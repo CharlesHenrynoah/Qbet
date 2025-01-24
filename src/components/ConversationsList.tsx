@@ -10,8 +10,18 @@ interface Conversation {
 
 interface Message {
   content: string;
-  type: 'user' | 'assistant' | 'stats';
+  type: 'user' | 'assistant' | 'stats' | 'attachments';
   freelancers?: any[];
+  attachments?: Attachment[];
+}
+
+interface Attachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  uploadedAt: Date;
 }
 
 interface ConversationsListProps {
